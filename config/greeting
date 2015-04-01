@@ -1,5 +1,15 @@
 #!/bin/bash
 
-printf '%s\n' "Hi $USER! You've successfully authenticated, but I do not"
-printf '%s\n' "provide interactive shell access."
+printf '%s\n' "Hi $USER! You have successfully"
+printf '%s\n' "authenticated, but I do not provide"
+printf '%s\n' "interactive shell access."
+printf '%s\n' "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+printf '%s\n' "@  WARNING: THIS IS EARLY PREVIEW CODE  @"
+printf '%s\n' "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+printf '%s\n' "| Do not expect functionality. APIs and |"
+printf '%s\n' "| underlying architecture are changing  |"
+printf '%s\n' "| constantly and without notice. If you |"
+printf '%s\n' "| want to help building Coduno, please  |"
+printf '%s\n' "| contact root@cod.uno.                 |"
+printf '%s\n' "\~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~/"
 exit 128
