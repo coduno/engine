@@ -1,0 +1,5 @@
+# Excluse test directory
+test/*
+
+#Exclude .rc files
+*.rc
