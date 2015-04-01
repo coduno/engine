@@ -7,6 +7,7 @@
 PACKAGES="openssh-server git docker.io"
 GIT_USER=git
 GIT_GROUP=git
+GIT_SHELL=/usr/bin/git-shell
 DEFAULT_REPO_DIR=/opt/coduno/engine/repo/
 DEFAULT_GIT_HOME=/opt/coduno/engine/git/
 DEFAULT_CONFIG_FILE=config.rc
@@ -46,7 +47,7 @@ if id -u $GIT_USER > /dev/null 2>&1 ; then
 	echo "User '$GIT_USER' already exists, setting \$GIT_HOME to $GIT_HOME"
 else
 	echo "Adding new user '$GIT_USER'"
-	useradd -d $GIT_HOME $GIT_USER
+	useradd -d $GIT_HOME -s $GIT_SHELL $GIT_USER
 	GIT_GROUP=$(id -g -n $GIT_USER)
 	echo "Create home directory '$GIT_HOME'"
 	mkdir $GIT_HOME
@@ -59,13 +60,29 @@ mkdir -p $GIT_HOME.ssh
 touch $GIT_HOME.ssh/authorized_keys
 chown -R $GIT_USER:$GIT_GROUP $GIT_HOME.ssh
 
+# Set greeting for the interactive shell
+echo "Set greeting message for user git"
+mkdir -p $GIT_HOME"git-shell-commands"
+cp ./config/greeting $GIT_HOME"git-shell-commands/no-interactive-login"
+chown -R $GIT_USER:$GIT_GROUP $GIT_HOME"git-shell-commands"
+chmod a+x $GIT_HOME"git-shell-commands/no-interactive-login"
+
+# Copy hooks to git directory
+echo "Copying hooks to '$GIT_HOME'"
+mkdir -p $GIT_HOME/hooks
+cp ./config/pre-receive ./config/post-receive $GIT_HOME/hooks
+
 # Ensure $REPO_DIR exists
 echo "Ensure that the repo directory exists at '$REPO_DIR'"
 mkdir -p $REPO_DIR
+
+# Ensure git has write access to $REPO_DIR
+echo "Change owner of '$REPO_DIR' to '$GIT_USER'"
+chown -R $GIT_USER:$GIT_GROUP $REPO_DIR
 
 # Write config
 echo "export REPO_DIR=$REPO_DIR" > $CONFIG_FILE
 echo "export GIT_USER=$GIT_USER" >> $CONFIG_FILE
 echo "export GIT_HOME=$GIT_HOME" >> $CONFIG_FILE
 echo "export GIT_GROUP=$GIT_GROUP" >> $CONFIG_FILE
-
+echo "export GIT_SHELL=$GIT_SHELL" >> $CONFIG_FILE

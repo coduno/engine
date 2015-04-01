@@ -1,0 +1,5 @@
+#!/bin/bash
+#
+# Post receive hook to start docker container
+
+echo "Docker to go"
