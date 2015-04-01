@@ -2,4 +2,32 @@
 #
 # Post receive hook to start docker container
 
-echo "Docker to go"
+SRC_DIR=$(pwd)
+
+# Read input, each line is a single commit
+while read line
+do
+	# Get commit hash, since pre-receive will discard bad branches
+	# we don't need to check this here again TODO: make pre-receive
+	# actually do those things
+	read -a REFS <<< $line
+	COMMIT=${REFS[1]}
+	
+	# Make build directory TODO: Switch to ProcessID or something?
+	mkdir "/tmp/"$COMMIT
+	cd "/tmp/"$COMMIT
+	
+	# Clone source tree, checkout commit
+	cp $SRC_DIR"/Dockerfile" .
+	git clone -n $SRC_DIR src
+	cd src
+	git checkout $COMMIT # Something breaks here, TODO: fix it
+	# We don't need this directory anymore
+	rm -rf ".git/" 
+	cd ..
+	
+	sudo docker build .
+	
+	#clean up
+	rm -rf "/tmp/"$COMMIT
+done

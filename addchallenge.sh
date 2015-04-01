@@ -32,7 +32,7 @@ if [ -d $CHALLENGE_NAME".git" ]; then
 fi
 
 echo "Create directory for challenge '$CHALLENGE_NAME'"
-mkdir $CHALLENGE_NAME".git"
+mkdir -p $CHALLENGE_NAME".git"
 cd $CHALLENGE_NAME".git"
 
 # Init git repo without working directory
@@ -40,9 +40,12 @@ echo "Let git init the repo"
 git --bare init 
 
 rm -rf hooks
-ln -s $GIT_HOME/hooks hooks 
-chmod a+x $(pwd)/hooks/*
+ln -s $GIT_HOME"/hooks" "hooks"
+chmod a+x $(echo $(pwd)"/hooks/*")
 chown -R $GIT_USER:$GIT_GROUP $(pwd)
+
+# Copy dockerfile TODO: make dockerfile customizable
+cp $GIT_HOME"/Dockerfile.default" ./Dockerfile
 
 # Link directory for convinient access
 echo "Setting link"

@@ -3,6 +3,24 @@
 # Author: Moritz Wanzenböck (moritz.wanzenboeck@gmail.com)
 #
 # Script to set up a debian/ubuntu server to be used as a docker engine
+#
+# Filesystem layout:
+# $REPO_DIR
+#   |-<example challenge>
+#   |   |-<git stuff>
+#   |   |-hooks --> $GIT_DIR/hooks
+#   |   \-Dockerfile
+# 
+# $GIT_HOME
+#   |-.ssh
+#   |   \-authorized_keys
+#   |-hooks
+#   |   |-pre-receive
+#   |   \-post-receive
+#   |-git-shell-commands
+#   |   \-no-interactive-login
+#   |-Dockerfile.default
+#
 
 PACKAGES="openssh-server git docker.io"
 GIT_USER=git
@@ -56,9 +74,9 @@ fi
 
 # Add .ssh/authorized_keys file to $GIT_USER
 echo "Ensure there is an authorized_keys file for user '$GIT_USER' at '$GIT_HOME'"
-mkdir -p $GIT_HOME.ssh
-touch $GIT_HOME.ssh/authorized_keys
-chown -R $GIT_USER:$GIT_GROUP $GIT_HOME.ssh
+mkdir -p $GIT_HOME"/.ssh"
+touch $GIT_HOME"/.ssh/authorized_keys"
+chown -R $GIT_USER:$GIT_GROUP $GIT_HOME"/.ssh"
 
 # Set greeting for the interactive shell
 echo "Set greeting message for user git"
@@ -71,6 +89,10 @@ chmod a+x $GIT_HOME"git-shell-commands/no-interactive-login"
 echo "Copying hooks to '$GIT_HOME'"
 mkdir -p $GIT_HOME/hooks
 cp ./config/pre-receive ./config/post-receive $GIT_HOME/hooks
+chown -R $GIT_USER:$GIT_GROUP $GIT_HOME"/hooks"
+
+# Copy default Dockerfile to $GIT_HOME
+cp ./config/Dockerfile $GIT_HOME"/Dockerfile.default"
 
 # Ensure $REPO_DIR exists
 echo "Ensure that the repo directory exists at '$REPO_DIR'"
