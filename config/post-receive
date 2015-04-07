@@ -19,15 +19,16 @@ do
 	
 	# Clone source tree, checkout commit
 	cp $SRC_DIR"/Dockerfile" .
-	git clone -n $SRC_DIR src
-	cd src
-	git checkout $COMMIT # Something breaks here, TODO: fix it
+	git clone $SRC_DIR src;
+	cd src;
+   #	git checkout $COMMIT; # Something breaks here, TODO: fix it
 	# We don't need this directory anymore
 	rm -rf ".git/" 
 	cd ..
 	
 	sudo docker build .
 	
+	sudo docker run .
 	#clean up
 	rm -rf "/tmp/"$COMMIT
 done
