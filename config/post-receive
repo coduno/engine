@@ -3,6 +3,7 @@
 # Post receive hook to start docker container
 
 SRC_DIR=$(pwd)
+CHALLENGE_NAME=$(basename $SRC_DIR)
 
 # Read input, each line is a single commit
 while read line
@@ -26,9 +27,9 @@ do
 	rm -rf ".git/" 
 	cd ..
 	
-	sudo docker build .
+	sudo docker build -t $CHALLENGE_NAME .
 	
-	sudo docker run .
+	sudo docker run $CHALLENGE_NAME
 	#clean up
 	rm -rf "/tmp/"$COMMIT
 done
