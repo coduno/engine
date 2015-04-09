@@ -10,7 +10,7 @@
 #   |   |-<git stuff>
 #   |   |-hooks --> $GIT_DIR/hooks
 #   |   \-Dockerfile
-# 
+#
 # $GIT_HOME
 #   |-.ssh
 #   |   \-authorized_keys
@@ -84,6 +84,10 @@ mkdir -p $GIT_HOME"git-shell-commands"
 cp ./config/greeting $GIT_HOME"git-shell-commands/no-interactive-login"
 chown -R $GIT_USER:$GIT_GROUP $GIT_HOME"git-shell-commands"
 chmod a+x $GIT_HOME"git-shell-commands/no-interactive-login"
+
+# Prevent SSHd from printing MOTD and Last Login
+touch $GIT_HOME"/.hushlogin"
+chmod 0444 $GIT_HOME"/.hushlogin"
 
 # Copy hooks to git directory
 echo "Copying hooks to '$GIT_HOME'"
