@@ -35,7 +35,7 @@ cd $CHALLENGE_NAME".git"
 
 # Init git repo without working directory
 echo "Let git init the repo"
-git --bare init 
+git --bare init
 
 rm -rf hooks
 ln -s $GIT_HOME"/hooks" "hooks"

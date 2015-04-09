@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# $GIT_DIR is set to point to the repository that
+# triggered the hook (relative to $PWD).
+# Leaving this set will hurt your brains, trust me.
+unset GIT_DIR
+
+CLONE=$(mktemp -d)
+
+# As users are only allowed to push to their named branch
+# there can only be one line of input, so we can safely
+# omit a loop here.
+read OLD NEW REF
+
+# Now clone the repository to out temporary directory.
+# Keep in mind that $PWD still points to the reposotiry
+# because we are inside a hook.
+git clone --no-checkout --quiet $PWD $CLONE
+
+# Check out the reference the user has pushed, do it
+# quietly as we do not really care about detaching HEAD
+git -C $CLONE checkout --quiet $NEW
+
+sudo docker run -v $CLONE:/run:ro coduno/base

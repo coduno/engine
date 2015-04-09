@@ -15,8 +15,8 @@
 #   |-.ssh
 #   |   \-authorized_keys
 #   |-hooks
-#   |   |-pre-receive
-#   |   \-post-receive
+#   |   |-post-receive
+#   |   \-update
 #   |-git-shell-commands
 #   |   \-no-interactive-login
 #   |-Dockerfile.default
@@ -92,7 +92,7 @@ chmod 0444 $GIT_HOME"/.hushlogin"
 # Copy hooks to git directory
 echo "Copying hooks to '$GIT_HOME'"
 mkdir -p $GIT_HOME/hooks
-cp ./config/pre-receive ./config/post-receive $GIT_HOME/hooks
+cp ./hooks/post-receive ./hooks/update $GIT_HOME/hooks
 chown -R $GIT_USER:$GIT_GROUP $GIT_HOME"/hooks"
 
 # Copy default Dockerfile to $GIT_HOME
