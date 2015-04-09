@@ -1,7 +1,4 @@
 #!/bin/bash
 
-line=$(tail -n 1000 /var/log/auth.log | grep -Eo 'matching key found: file .+, line [0-9]+' | tail -n 1 | grep -Eo '[0-9]+$')
-user=$(sed -n ${line}p ~/.ssh/authorized_keys | cut -f3 -d' ')
-
-printf '%s\n' "Hi $user! You've successfully authenticated, but Coduno does not provide shell access."
+printf '%s\n' "Hi $GITHUB_USERNAME! You've successfully authenticated, but Coduno does not provide shell access."
 exit 128

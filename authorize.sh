@@ -26,5 +26,5 @@ USER_NAME=$1
 curl "https://api.github.com/users/$USER_NAME/keys" | grep key | tr -d '"' | cut -d' ' -f6- \
 | while read key
 do
-	echo "$key $USER_NAME" | tee -a $GIT_HOME/.ssh/authorized_keys
+	echo "environment=\"GITHUB_USERNAME=$USER_NAME\" $key" | tee -a $GIT_HOME/.ssh/authorized_keys
 done
