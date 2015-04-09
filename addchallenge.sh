@@ -6,7 +6,6 @@
 # Script to add a new challenge on this server
 
 DEFAULT_CONFIG_FILE=config.rc
-QUICK_LINK_DIR=/challenge/
 
 # $CONFIG_FILE should point at the config file created by setup.sh
 if [ -z $CONFIG_FILE ]; then
@@ -22,7 +21,6 @@ if [ -z $1 ]; then
 fi
 
 CHALLENGE_NAME=$1
-
 
 # Check if challenge already exists
 cd $REPO_DIR
@@ -49,5 +47,4 @@ cp $GIT_HOME"/Dockerfile.default" ./Dockerfile
 
 # Link directory for convinient access
 echo "Setting link"
-mkdir -p $QUICK_LINK_DIR
-ln -s $(pwd) $QUICK_LINK_DIR/$CHALLENGE_NAME".git"
+ln -s $(pwd) $GIT_HOME/$CHALLENGE_NAME
