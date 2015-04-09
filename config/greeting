@@ -1,4 +1,3 @@
 #!/bin/bash
-
-printf '%s\n' "Hi $GITHUB_USERNAME! You've successfully authenticated, but Coduno does not provide shell access."
+echo "Hi $GITHUB_USERNAME! You've successfully authenticated, but Coduno does not provide shell access."
 exit 128
