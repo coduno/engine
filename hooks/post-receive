@@ -5,7 +5,7 @@
 # Leaving this set will hurt your brains, trust me.
 unset GIT_DIR
 
-CLONE=$(mktemp -d)
+CLONE=$(mktemp -p /tmp -d coduno.XXX)
 
 # As users are only allowed to push to their named branch
 # there can only be one line of input, so we can safely
