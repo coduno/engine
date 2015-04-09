@@ -68,7 +68,7 @@ else
 	useradd -d $GIT_HOME -s $GIT_SHELL $GIT_USER
 	GIT_GROUP=$(id -g -n $GIT_USER)
 	echo "Create home directory '$GIT_HOME'"
-	mkdir $GIT_HOME
+	mkdir -p $GIT_HOME
 	chown $GIT_USER:$GIT_GROUP $GIT_HOME
 fi
 
