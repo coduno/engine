@@ -21,4 +21,5 @@ git clone --no-checkout --quiet $PWD $CLONE
 # quietly as we do not really care about detaching HEAD
 git -C $CLONE checkout --quiet $NEW
 
-sudo docker run -v $CLONE:/run:ro coduno/base
+
+~/runTest.py $NEW

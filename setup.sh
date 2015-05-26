@@ -20,6 +20,7 @@
 #   |-git-shell-commands
 #   |   \-no-interactive-login
 #   |-Dockerfile.default
+#   |-runTest.py
 #
 
 PACKAGES="openssh-server git docker.io"
@@ -90,13 +91,18 @@ touch $GIT_HOME"/.hushlogin"
 chmod 0444 $GIT_HOME"/.hushlogin"
 
 # Copy hooks to git directory
-echo "Copying hooks to '$GIT_HOME'"
+echo "Copy hooks to '$GIT_HOME'"
 mkdir -p $GIT_HOME/hooks
 cp ./hooks/post-receive ./hooks/update $GIT_HOME/hooks
 chown -R $GIT_USER:$GIT_GROUP $GIT_HOME"/hooks"
 
 # Copy default Dockerfile to $GIT_HOME
+echo "Copy default Dockerfile and runTest.py to '$GIT_HOME'"
 cp ./config/Dockerfile $GIT_HOME"/Dockerfile.default"
+
+# Copy runTest.py to $GIT_HOME
+cp ./runTest.py $GIT_HOME"/runTest.py"
+chmod 555 $GIT_HOME"/runTest.py"
 
 # Ensure $REPO_DIR exists
 echo "Ensure that the repo directory exists at '$REPO_DIR'"
