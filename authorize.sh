@@ -23,7 +23,8 @@ fi
 
 USER_NAME=$1
 
-curl "https://github.com/${USER_NAME}.keys" | while read key
+curl "https://github.com/${USER_NAME}.keys" | sed -e '$a\' | while read key
 do
+	echo "hallo"
 	echo "environment=\"GITHUB_USERNAME=$USER_NAME\" $key" | tee -a $GIT_HOME/.ssh/authorized_keys
 done
