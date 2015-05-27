@@ -17,7 +17,4 @@ RUN cd /coduno; make
 # Set working directory
 WORKDIR /app
 
-# Get app into the container
-ADD ./src /app
-
 ENTRYPOINT ["/coduno/coduno", "run"]
