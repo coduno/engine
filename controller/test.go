@@ -9,18 +9,18 @@ import (
 
 var signal = make(chan int)
 
-func send_sig() {
+func sendSig() {
 	signal <- 1
 }
 
-func pipe_output(out io.ReadCloser, dest io.WriteCloser, logBuf *bytes.Buffer) {
+func pipeOutput(out io.ReadCloser, dest io.WriteCloser, logBuf *bytes.Buffer) {
 	tempBuf := make([]byte, 1024)
 	writeErr := error(nil)
 	r, readErr := int(0), error(nil)
 
 	defer out.Close()
 	defer dest.Close()
-	defer send_sig()
+	defer sendSig()
 
 	for readErr == nil {
 		r, readErr = out.Read(tempBuf)
@@ -48,7 +48,7 @@ func main() {
 
 	var b bytes.Buffer
 	cmd.Start()
-	go pipe_output(stdout, stdin, &b)
+	go pipeOutput(stdout, stdin, &b)
 
 	<-signal
 	log.Print(b.String())

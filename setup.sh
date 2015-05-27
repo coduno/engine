@@ -14,19 +14,21 @@
 # $GIT_HOME
 #   |-.ssh
 #   |   \-authorized_keys
+#   |-controller
+#   |   \-test.go
 #   |-hooks
 #   |   |-post-receive
 #   |   \-update
 #   |-git-shell-commands
 #   |   \-no-interactive-login
 #   |-Dockerfile.default
-#   |-runTest.py
 #
 
 PACKAGES="openssh-server git docker.io"
 GIT_USER=git
 GIT_GROUP=git
 GIT_SHELL=/usr/bin/git-shell
+DOCKER_TAG="coduno/base"
 DEFAULT_REPO_DIR=/opt/coduno/engine/repo/
 DEFAULT_GIT_HOME=/opt/coduno/engine/git/
 DEFAULT_CONFIG_FILE=config.rc
@@ -59,7 +61,7 @@ apt-get -y install $PACKAGES > /dev/null
 
 # Add git user, if neccessary
 echo "Setting up user '$GIT_USER'"
-if id -u $GIT_USER > /dev/null 2>&1 ; then 
+if id -u $GIT_USER > /dev/null 2>&1 ; then
 	# User exists, point $GIT_HOME to right directory
 	GIT_HOME=$(eval echo ~$GIT_USER)
 	GIT_GROUP=$(id -g -n $GIT_USER)
@@ -96,10 +98,6 @@ mkdir -p $GIT_HOME/hooks
 cp ./hooks/post-receive ./hooks/update $GIT_HOME/hooks
 chown -R $GIT_USER:$GIT_GROUP $GIT_HOME"/hooks"
 
-# Copy default Dockerfile to $GIT_HOME
-echo "Copy default Dockerfile and runTest.py to '$GIT_HOME'"
-cp ./config/Dockerfile $GIT_HOME"/Dockerfile.default"
-
 # Copy runTest.py to $GIT_HOME
 echo "Ensure test command can be run in home dir"
 mkdir -p $GIT_HOME"/src"
@@ -114,6 +112,11 @@ mkdir -p $REPO_DIR
 # Ensure git has write access to $REPO_DIR
 echo "Change owner of '$REPO_DIR' to '$GIT_USER'"
 chown -R $GIT_USER:$GIT_GROUP $REPO_DIR
+
+# Ensure docker is running and create image '$DOCKER_TAG'
+echo "Ensure that docker is running and create image '$DOCKER_TAG'"
+service docker start
+docker build -t $DOCKER_TAG ./config/
 
 # Write config
 echo "export REPO_DIR=$REPO_DIR" > $CONFIG_FILE
