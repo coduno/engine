@@ -3,3 +3,6 @@ test/*
 
 #Exclude .rc files
 *.rc
+
+#Exclude private config files
+config/*.json
