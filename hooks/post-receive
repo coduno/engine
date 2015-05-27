@@ -22,4 +22,4 @@ git clone --no-checkout --quiet $PWD $CLONE
 git -C $CLONE checkout --quiet $NEW
 
 
-~/runTest.py $NEW
+~/test $NEW

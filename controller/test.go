@@ -1,10 +1,10 @@
 package main
 
 import (
-	"os/exec"
 	"bytes"
 	"io"
 	"log"
+	"os/exec"
 )
 
 var signal = make(chan int)
@@ -17,15 +17,15 @@ func pipe_output(out io.ReadCloser, dest io.WriteCloser, logBuf *bytes.Buffer) {
 	tempBuf := make([]byte, 1024)
 	writeErr := error(nil)
 	r, readErr := int(0), error(nil)
-	
+
 	defer out.Close()
 	defer dest.Close()
 	defer send_sig()
-	
-	for ; readErr == nil; {
+
+	for readErr == nil {
 		r, readErr = out.Read(tempBuf)
 		logBuf.Write(tempBuf[0:r])
-		
+
 		if r != 0 && writeErr == nil {
 			_, writeErr := dest.Write(tempBuf[0:r])
 			if writeErr != nil {
@@ -45,11 +45,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	var b bytes.Buffer
 	cmd.Start()
 	go pipe_output(stdout, stdin, &b)
-	
+
 	<-signal
 	log.Print(b.String())
 }

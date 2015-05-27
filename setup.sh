@@ -101,8 +101,11 @@ echo "Copy default Dockerfile and runTest.py to '$GIT_HOME'"
 cp ./config/Dockerfile $GIT_HOME"/Dockerfile.default"
 
 # Copy runTest.py to $GIT_HOME
-cp ./runTest.py $GIT_HOME"/runTest.py"
-chmod 555 $GIT_HOME"/runTest.py"
+echo "Ensure test command can be run in home dir"
+mkdir -p $GIT_HOME"/src"
+cp ./controller/test.go $GIT_HOME"/src/"
+go build -o $GIT_HOME"/test" $GIT_HOME"/src/test.go"
+chmod 555 $GIT_HOME"/test"
 
 # Ensure $REPO_DIR exists
 echo "Ensure that the repo directory exists at '$REPO_DIR'"
