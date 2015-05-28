@@ -56,7 +56,8 @@ fi
 
 # Install all required packages
 echo "Install required packages"
-apt-get -y install $PACKAGES > /dev/null
+apt-get -y install $PACKAGES > /dev/null 2>&1 || \
+yum -y install $PACKAGES > /dev/null 2>&1
 
 
 # Add git user, if neccessary
