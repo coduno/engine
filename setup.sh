@@ -102,10 +102,10 @@ mkdir -p $GIT_HOME/hooks
 cp ./hooks/post-receive ./hooks/update $GIT_HOME/hooks
 chown -R $GIT_USER:$GIT_GROUP $GIT_HOME"/hooks"
 
-# Copy runTest.py to $GIT_HOME
+# Copy test to $GIT_HOME
 echo "Ensure test command can be run in home dir"
 mkdir -p $GIT_HOME"/src"
-cp ./controller/test.go $GIT_HOME"/src/"
+cp ./controller/*.go $GIT_HOME"/src/"
 go build -o $GIT_HOME"/test" $GIT_HOME"/src/test.go"
 chmod 555 $GIT_HOME"/test"
 
