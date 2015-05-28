@@ -21,6 +21,7 @@ git clone --no-checkout --quiet $PWD $CLONE
 # quietly as we do not really care about detaching HEAD
 git -C $CLONE checkout --quiet $NEW
 
-
+# Remove git information, we dont need it anymore
+rm -rf $CLONE"/.git"
 
 ~/test $NEW $CLONE
