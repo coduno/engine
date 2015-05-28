@@ -30,6 +30,9 @@ DEFAULT_REPO_DIR=/opt/coduno/engine/repo/
 DEFAULT_GIT_HOME=/opt/coduno/engine/git/
 DEFAULT_CONFIG_FILE=config.rc
 
+# Exit on error
+set -e
+
 # $CONFIG_FILE points at the file used to store the created config
 if [ -z $CONFIG_FILE ]; then
 	CONFIG_FILE=$DEFAULT_CONFIG_FILE

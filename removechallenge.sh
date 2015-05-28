@@ -8,6 +8,9 @@ RUN_DIR=$(pwd)
 DEFAULT_CONFIG_FILE=config.rc
 QUICK_LINK_DIR=/challenge/
 
+# Exit on error
+set -e
+
 # $CONFIG_FILE should point at the config file created by setup.sh
 if [ -z $CONFIG_FILE ]; then
 	CONFIG_FILE=$DEFAULT_CONFIG_FILE
