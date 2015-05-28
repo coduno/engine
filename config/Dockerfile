@@ -17,4 +17,4 @@ RUN cd /coduno; make
 # Set working directory
 WORKDIR /app
 
-ENTRYPOINT ["/coduno/coduno", "run"]
+ENTRYPOINT ["/bin/bash", "-c", "/coduno/coduno prepare > /dev/null && /coduno/coduno run"]
