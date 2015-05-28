@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"log"
+	"os"
 	"os/exec"
 )
 
@@ -36,8 +37,19 @@ func pipeOutput(out io.ReadCloser, dest io.WriteCloser, logBuf *bytes.Buffer) {
 }
 
 func main() {
-	cmd := exec.Command("timeout", "0.02", "./test.sh")
+	if len(os.Args) != 3 {
+		log.Fatal("Invalid number of arguments. This should never have happend")
+	}
+
+	commit := os.Args[1]
+	tmpdir := os.Args[2]
+
+	cmd := exec.Command("sudo", "docker", "run", "--rm", "-v", tmpdir+":/app", "coduno/base")
 	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		log.Fatal(err)
+	}
+	stderr, err := cmd.StderrPipe()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -46,10 +58,15 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var b bytes.Buffer
+	var b1 bytes.Buffer
+	var b2 bytes.Buffer
 	cmd.Start()
-	go pipeOutput(stdout, stdin, &b)
+	go pipeOutput(stdout, stdin, &b1)
+	go pipeOutput(stderr, stdin, &b2)
 
 	<-signal
-	log.Print(b.String())
+	<-signal
+	log.Print(b1.String())
+	log.Print(b2.String())
+	log.Print(commit)
 }
