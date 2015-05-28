@@ -7,6 +7,9 @@
 
 DEFAULT_CONFIG_FILE=config.rc
 
+# Exit on error
+set -e
+
 # $CONFIG_FILE should point at the config file created by setup.sh
 if [ -z $CONFIG_FILE ]; then
 	CONFIG_FILE=$DEFAULT_CONFIG_FILE
