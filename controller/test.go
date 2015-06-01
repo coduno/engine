@@ -5,61 +5,63 @@ import (
 	"io"
 	"log"
 	"os"
+	"time"
+
+	"golang.org/x/net/context"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
+	"golang.org/x/oauth2/jwt"
 
 	"io/ioutil"
 
-	"golang.org/x/net/context"
-	"golang.org/x/oauth2/google"
-	"golang.org/x/oauth2/jwt"
-	"google.golang.org/api/datastore/v1beta2"
+	"google.golang.org/cloud"
+	"google.golang.org/cloud/datastore"
 )
+
+// LogData holds all data that is stored for a single run of coduno
+type LogData struct {
+	Challenge string
+	User      string
+	Commit    string
+	Status    string
+	StartTime time.Time
+	EndTime   time.Time
+	InLog     string
+	OutLog    string
+	ExtraLog  string
+}
 
 var signal = make(chan int)
 var secret []byte
 var config *jwt.Config
-var service *datastore.Service
+var ctx context.Context
 
 func init() {
 	err := error(nil)
-	secret, err = ioutil.ReadFile("../config/Coduno-6b4d6d5a0f06.json")
+	secret, err = ioutil.ReadFile("../config/secret.json")
 	if err != nil {
 		panic(err)
 	}
-	config, err = google.JWTConfigFromJSON(secret, datastore.DatastoreScope)
+	config, err = google.JWTConfigFromJSON(secret, datastore.ScopeDatastore, datastore.ScopeUserEmail)
 	if err != nil {
 		panic(err)
 	}
-	client := config.Client(context.Background())
-	service, err = datastore.New(client)
-	if err != nil {
-		panic(err)
-	}
+
+	ctx = cloud.NewContext("coduno", config.Client(oauth2.NoContext))
 }
 
 // LogBuildStart sends info to the datastore, informing that a new build
 // started
 func LogBuildStart(repo string, commit string, user string) {
-	insert := new(datastore.CommitRequest)
-	insert.Mode = "NON_TRANSACTIONAL"
-	path := make([]*datastore.KeyPathElement, 1)
-	path[0] = new(datastore.KeyPathElement)
-	path[0].Kind = "testrun"
-	mutation := new(datastore.Mutation)
-	mutation.InsertAutoId = make([]*datastore.Entity, 1)
-	mutation.InsertAutoId[0] = new(datastore.Entity)
-	mutation.InsertAutoId[0].Properties = make(map[string]datastore.Property)
-	mutation.InsertAutoId[0].Properties["repo"] = datastore.Property{StringValue: repo}
-	mutation.InsertAutoId[0].Properties["commit"] = datastore.Property{StringValue: commit}
-	mutation.InsertAutoId[0].Properties["user"] = datastore.Property{StringValue: user}
-	mutation.InsertAutoId[0].Key = new(datastore.Key)
-	mutation.InsertAutoId[0].Key.Path = path
-
-	req := service.Datasets.Commit("coduno", insert)
-	ret, err := req.Do()
+	key := datastore.NewIncompleteKey(ctx, "testrun", nil)
+	_, err := datastore.Put(ctx, key, &LogData{
+		Commit:    commit,
+		Challenge: repo,
+		User:      user,
+	})
 	if err != nil {
 		log.Panic(err)
 	}
-	log.Print(ret.Header)
 }
 
 func sendSig() {
