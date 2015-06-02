@@ -26,4 +26,4 @@ rm -rf $CLONE"/.git"
 
 # Invoke a testrun of the current commit
 REPO=$(basename $(pwd))
-~/go/bin/testrun $GITHUB_USER $REPO $NEW $CLONE
+~/go/bin/testrun $GITHUB_USERNAME $REPO $NEW $CLONE
