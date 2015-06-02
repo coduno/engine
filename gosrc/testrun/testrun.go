@@ -47,7 +47,8 @@ func init() {
 	if err != nil {
 		log.Panic(err)
 	}
-	config, err := google.JWTConfigFromJSON(secret, datastore.ScopeDatastore, datastore.ScopeUserEmail)
+	config, err := google.JWTConfigFromJSON(secret, datastore.ScopeDatastore,
+		datastore.ScopeUserEmail)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -57,7 +58,8 @@ func init() {
 
 // LogBuildStart sends info to the datastore, informing that a new build
 // started
-func LogBuildStart(repo string, commit string, user string) (*datastore.Key, *BuildData) {
+func LogBuildStart(repo string, commit string, user string) (*datastore.Key,
+	*BuildData) {
 	key := datastore.NewIncompleteKey(ctx, "testrun", nil)
 	build := &BuildData{
 		Commit:    commit,
@@ -75,7 +77,8 @@ func LogBuildStart(repo string, commit string, user string) (*datastore.Key, *Bu
 
 // LogRunComplete logs the end of a completed (failed of finished) run of
 // a coduno testrun
-func LogRunComplete(pKey *datastore.Key, build *BuildData, in string, out string, extra string, exit error) {
+func LogRunComplete(pKey *datastore.Key, build *BuildData, in string,
+	out string, extra string, exit error) {
 	tx, err := datastore.NewTransaction(ctx)
 	if err != nil {
 		log.Panic(err)
@@ -151,7 +154,14 @@ func main() {
 	tmpdir := os.Args[4]
 
 	key, build := LogBuildStart(repo, commit, username)
-	cmd := exec.Command("sudo", "docker", "run", "--rm", "-v", tmpdir+":/app", "coduno/base")
+	cmd := exec.Command(
+		"sudo",
+		"docker",
+		"run",
+		"--rm",
+		"-v",
+		tmpdir+":/app",
+		"coduno/base")
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		log.Fatal(err)
