@@ -14,8 +14,12 @@
 # $GIT_HOME
 #   |-.ssh
 #   |   \-authorized_keys
-#   |-controller
-#   |   \-test.go
+#   |-go
+#   |   |-bin
+#   |   |-pkg
+#   |   \-src
+#   |      \-testrun
+#   |         \-testrun.go
 #   |-hooks
 #   |   |-post-receive
 #   |   \-update
@@ -102,12 +106,24 @@ mkdir -p $GIT_HOME/hooks
 cp ./hooks/post-receive ./hooks/update $GIT_HOME/hooks
 chown -R $GIT_USER:$GIT_GROUP $GIT_HOME"/hooks"
 
-# Copy runTest.py to $GIT_HOME
-echo "Ensure test command can be run in home dir"
-mkdir -p $GIT_HOME"/src"
-cp ./controller/test.go $GIT_HOME"/src/"
-go build -o $GIT_HOME"/test" $GIT_HOME"/src/test.go"
-chmod 555 $GIT_HOME"/test"
+# Set up go path and copy testrun source into into
+echo "Copy go source files"
+mkdir -p $GIT_HOME"/go/src"
+cp -r gosrc/* $GIT_HOME"/go/src"
+chown -R $GIT_USER:$GIT_GROUP $GIT_HOME"/go"
+
+# Set GOPATH and build testrun
+echo "Build testrun command"
+echo "export GOPATH=$GIT_HOME'/go'" >> $GIT_HOME"/.profile"
+chown $GIT_USER:$GIT_GROUP $GIT_HOME"/.profile"
+su -s "/bin/bash" - git -c "go get testrun && go build testrun"
+
+# Copy config files
+echo "Copy config files"
+mkdir -p $GIT_HOME"/config"
+cp ./config/* $GIT_HOME"/config"
+chown -R $GIT_USER:$GIT_GROUP $GIT_HOME"/config"
+chmod -R 555 $GIT_HOME"/config"
 
 # Ensure $REPO_DIR exists
 echo "Ensure that the repo directory exists at '$REPO_DIR'"
