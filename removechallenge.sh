@@ -26,9 +26,5 @@ fi
 
 CHALLENGE_NAME=$1
 
-
-echo "Remove link"
-rm $QUICK_LINK_DIR/$CHALLENGE_NAME".git" > /dev/null 2>&1
-
 echo "Remove git repo"
 rm -rf $REPO_DIR/$CHALLENGE_NAME".git" > /dev/null 2>&1

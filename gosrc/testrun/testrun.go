@@ -38,13 +38,14 @@ var ctx context.Context
 
 func init() {
 	err := error(nil)
-	secret, err = ioutil.ReadFile("../config/secret.json")
+	home := os.Getenv("HOME")
+	secret, err = ioutil.ReadFile(home + "/config/secret.json")
 	if err != nil {
-		panic(err)
+		log.Panic(err)
 	}
 	config, err = google.JWTConfigFromJSON(secret, datastore.ScopeDatastore, datastore.ScopeUserEmail)
 	if err != nil {
-		panic(err)
+		log.Panic(err)
 	}
 
 	ctx = cloud.NewContext("coduno", config.Client(oauth2.NoContext))
