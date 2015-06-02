@@ -89,8 +89,13 @@ chown -R $GIT_USER:$GIT_GROUP $GIT_HOME"/.ssh"
 echo "Set greeting message for user git"
 mkdir -p $GIT_HOME"git-shell-commands"
 cp ./config/greeting $GIT_HOME"git-shell-commands/no-interactive-login"
-chown -R $GIT_USER:$GIT_GROUP $GIT_HOME"git-shell-commands"
 chmod a+x $GIT_HOME"git-shell-commands/no-interactive-login"
+
+# Copy reroute-user script for access-control to allowed commands
+echo "Copy reroute-user to allowed commands"
+cp ./config/reroute-user $GIT_HOME"/git-shell-commands/reroute-user"
+chown -R $GIT_USER:$GIT_GROUP $GIT_HOME"git-shell-commands"
+chmod a+x $GIT_HOME"git-shell-commands/reroute-user"
 
 # Prevent SSHd from printing MOTD and Last Login
 touch $GIT_HOME"/.hushlogin"

@@ -6,7 +6,6 @@
 
 RUN_DIR=$(pwd)
 DEFAULT_CONFIG_FILE=config.rc
-QUICK_LINK_DIR=/challenge/
 
 # Exit on error
 set -e
@@ -27,8 +26,7 @@ fi
 CHALLENGE_NAME=$1
 
 
-echo "Remove link"
-rm $QUICK_LINK_DIR/$CHALLENGE_NAME".git" > /dev/null 2>&1
-
 echo "Remove git repo"
 rm -rf $REPO_DIR/$CHALLENGE_NAME".git" > /dev/null 2>&1
+rm "$GIT_HOME/$CHALLENGE_NAME"
+rm -rf "GIT_HOME/*/$CHALLENGE_NAME"

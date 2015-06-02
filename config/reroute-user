@@ -1,0 +1,36 @@
+#!/bin/bash
+# This file will be executed on every login per ssh
+# The script will reroute the user to his own repository if necessary
+
+read -r CMD REPO <<< "$SSH_ORIGINAL_COMMAND"
+
+if [ -z $GITHUB_USERNAME ] || [ -z $CMD ] || [ -z $REPO ]; then
+   exit 1
+fi
+
+REPO="${REPO%\'}"
+REPO="${REPO#\'}"
+
+if [ "$CMD" = "git-receive-pack" ]; then
+   if [ ! -d "$HOME/user/$GITHUB_USERNAME/$REPO" ]; then
+      mkdir -p "$HOME/user/$GITHUB_USERNAME"
+      git clone -q --mirror "$REPO" "$HOME/user/$GITHUB_USERNAME/$REPO"
+      rm -rf "$HOME/user/$GITHUB_USERNAME/$REPO/hooks"
+      ln -s "$HOME/hooks" "$HOME/user/$GITHUB_USERNAME/$REPO/hooks"
+   fi
+
+   #export HOME="$HOME/user/$GITHUB_USERNAME"
+   #cd $HOME
+   cd "$HOME/user/$GITHUB_USERNAME"
+elif [ "$CMD" = "git-upload-pack" ]; then
+   if [ -d "$HOME/user/$GITHUB_USERNAME/$REPO" ]; then
+      cd "$HOME/user/$GITHUB_USERNAME/$REPO"
+      git remote update
+
+   #   export HOME="$HOME/user/$GITHUB_USERNAME"
+   #   cd $HOME
+      cd "$HOME/user/$GITHUB_USERNAME"
+   fi
+fi
+
+/bin/git-shell -c "$SSH_ORIGINAL_COMMAND"
