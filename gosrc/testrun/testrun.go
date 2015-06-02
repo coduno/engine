@@ -5,12 +5,12 @@ import (
 	"io"
 	"log"
 	"os"
+	"os/exec"
 	"time"
 
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
-	"golang.org/x/oauth2/jwt"
 
 	"io/ioutil"
 
@@ -18,32 +18,36 @@ import (
 	"google.golang.org/cloud/datastore"
 )
 
-// LogData holds all data that is stored for a single run of coduno
-type LogData struct {
+// BuildData is used to represent general data for a single invokation of
+// a coduno build
+type BuildData struct {
 	Challenge string
 	User      string
 	Commit    string
 	Status    string
 	StartTime time.Time
 	EndTime   time.Time
-	InLog     string
-	OutLog    string
-	ExtraLog  string
+}
+
+// LogData is used to represent accumulated log data of a single invokation of
+// a coduno build
+type LogData struct {
+	InLog    string
+	OutLog   string
+	ExtraLog string
 }
 
 var signal = make(chan int)
-var secret []byte
-var config *jwt.Config
 var ctx context.Context
 
 func init() {
 	err := error(nil)
 	home := os.Getenv("HOME")
-	secret, err = ioutil.ReadFile(home + "/config/secret.json")
+	secret, err := ioutil.ReadFile(home + "/config/secret.json")
 	if err != nil {
 		log.Panic(err)
 	}
-	config, err = google.JWTConfigFromJSON(secret, datastore.ScopeDatastore, datastore.ScopeUserEmail)
+	config, err := google.JWTConfigFromJSON(secret, datastore.ScopeDatastore, datastore.ScopeUserEmail)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -53,13 +57,58 @@ func init() {
 
 // LogBuildStart sends info to the datastore, informing that a new build
 // started
-func LogBuildStart(repo string, commit string, user string) {
+func LogBuildStart(repo string, commit string, user string) (*datastore.Key, *BuildData) {
 	key := datastore.NewIncompleteKey(ctx, "testrun", nil)
-	_, err := datastore.Put(ctx, key, &LogData{
+	build := &BuildData{
 		Commit:    commit,
 		Challenge: repo,
 		User:      user,
-	})
+		StartTime: time.Now(),
+		Status:    "Started",
+	}
+	key, err := datastore.Put(ctx, key, build)
+	if err != nil {
+		log.Panic(err)
+	}
+	return key, build
+}
+
+// LogRunComplete logs the end of a completed (failed of finished) run of
+// a coduno testrun
+func LogRunComplete(pKey *datastore.Key, build *BuildData, in string, out string, extra string, exit error) {
+	tx, err := datastore.NewTransaction(ctx)
+	if err != nil {
+		log.Panic(err)
+	}
+	build.EndTime = time.Now()
+	if exit != nil {
+		build.Status = "FAILED"
+	} else {
+		build.Status = "DONE"
+	}
+	_, err = tx.Put(pKey, build)
+	if err != nil {
+		log.Panic(err)
+		err = tx.Rollback()
+		if err != nil {
+			log.Panic(err)
+		}
+	}
+	data := &LogData{
+		InLog:    in,
+		OutLog:   out,
+		ExtraLog: extra,
+	}
+	k := datastore.NewIncompleteKey(ctx, "testrun", pKey)
+	_, err = tx.Put(k, data)
+	if err != nil {
+		log.Panic(err)
+		err = tx.Rollback()
+		if err != nil {
+			log.Panic(err)
+		}
+	}
+	_, err = tx.Commit()
 	if err != nil {
 		log.Panic(err)
 	}
@@ -92,37 +141,38 @@ func pipeOutput(out io.ReadCloser, dest io.WriteCloser, logBuf *bytes.Buffer) {
 }
 
 func main() {
-	if len(os.Args) != 3 {
-		log.Fatal("Invalid number of arguments. This should never have happend")
+	if len(os.Args) != 5 {
+		log.Fatal(os.Args)
 	}
 
-	commit := os.Args[1]
-	tmpdir := os.Args[2]
-	LogBuildStart("test", commit, tmpdir)
-	/*
-		cmd := exec.Command("sudo", "docker", "run", "--rm", "-v", tmpdir+":/app", "coduno/base")
-		stdout, err := cmd.StdoutPipe()
-		if err != nil {
-			log.Fatal(err)
-		}
-		stderr, err := cmd.StderrPipe()
-		if err != nil {
-			log.Fatal(err)
-		}
-		stdin, err := cmd.StdinPipe()
-		if err != nil {
-			log.Fatal(err)
-		}
+	username := os.Args[1]
+	repo := os.Args[2]
+	commit := os.Args[3]
+	tmpdir := os.Args[4]
 
-		var b1 bytes.Buffer
-		var b2 bytes.Buffer
-		cmd.Start()
-		go pipeOutput(stdout, stdin, &b1)
-		go pipeOutput(stderr, stdin, &b2)
+	key, build := LogBuildStart(repo, commit, username)
+	cmd := exec.Command("sudo", "docker", "run", "--rm", "-v", tmpdir+":/app", "coduno/base")
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		log.Fatal(err)
+	}
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		log.Fatal(err)
+	}
+	stdin, err := cmd.StdinPipe()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-		<-signal
-		<-signal
-		log.Print(b1.String())
-		log.Print(b2.String())
-		log.Print(commit)*/
+	var b1 bytes.Buffer
+	var b2 bytes.Buffer
+	cmd.Start()
+	go pipeOutput(stdout, stdin, &b1)
+	go pipeOutput(stderr, stdin, &b2)
+
+	<-signal
+	<-signal
+	err = cmd.Wait()
+	LogRunComplete(key, build, "", b1.String(), b2.String(), err)
 }
