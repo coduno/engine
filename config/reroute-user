@@ -2,9 +2,12 @@
 # This file will be executed on every login per ssh
 # The script will reroute the user to his own repository if necessary
 
+# Before disaster happens, exit this script
+set -e
+
 read -r CMD REPO <<< "$SSH_ORIGINAL_COMMAND"
 
-if [ -z $GITHUB_USERNAME ] || [ -z $CMD ] || [ -z $REPO ]; then
+if [ -z "$GITHUB_USERNAME" ] || [ -z "$CMD" ] || [ -z "$REPO" ]; then
    exit 1
 fi
 

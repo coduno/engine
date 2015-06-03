@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Before disaster happens, exit this script
+set -e
+
 # $GIT_DIR is set to point to the repository that
 # triggered the hook (relative to $PWD).
 # Leaving this set will hurt your brains, trust me.
@@ -15,15 +18,15 @@ read OLD NEW REF
 # Now clone the repository to out temporary directory.
 # Keep in mind that $PWD still points to the reposotiry
 # because we are inside a hook.
-git clone --no-checkout --quiet $PWD $CLONE
+git clone --no-checkout --quiet "$PWD" "$CLONE"
 
 # Check out the reference the user has pushed, do it
 # quietly as we do not really care about detaching HEAD
-git -C $CLONE checkout --quiet $NEW
+git -C "$CLONE" checkout --quiet "$NEW"
 
 # Remove git information, we dont need it anymore
-rm -rf $CLONE"/.git"
+rm -rf "$CLONE/.git"
 
 # Invoke a testrun of the current commit
-REPO=$(basename $(pwd))
-~/go/bin/testrun $GITHUB_USERNAME $REPO $NEW $CLONE
+REPO="$(basename $(pwd))"
+~/go/bin/testrun "$GITHUB_USERNAME" "$REPO" "$NEW" "$CLONE"
