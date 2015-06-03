@@ -24,4 +24,6 @@ git -C $CLONE checkout --quiet $NEW
 # Remove git information, we dont need it anymore
 rm -rf $CLONE"/.git"
 
-~/test $NEW $CLONE
+# Invoke a testrun of the current commit
+REPO=$(basename $(pwd))
+~/go/bin/testrun $GITHUB_USERNAME $REPO $NEW $CLONE
