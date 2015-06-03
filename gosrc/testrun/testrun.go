@@ -160,7 +160,7 @@ func main() {
 		"run",
 		"--rm",
 		"-v",
-		tmpdir+":/app",
+		tmpdir+":/run",
 		"coduno/base")
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {

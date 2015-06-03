@@ -9,7 +9,6 @@
 #   |-<example challenge>
 #   |   |-<git stuff>
 #   |   |-hooks --> $GIT_DIR/hooks
-#   |   \-Dockerfile
 #
 # $GIT_HOME
 #   |-.ssh
@@ -25,9 +24,13 @@
 #   |   \-update
 #   |-git-shell-commands
 #   |   \-no-interactive-login
-#   |-Dockerfile.default
 #   |-config
+#   |   |-Dockerfile
 #   |   \-secret.json
+#   |-user
+#       |-<example user>
+#       |    \-<repo copy>
+#       \-<example user2>
 #
 
 PACKAGES="openssh-server git docker.io"
@@ -143,7 +146,7 @@ chown -R "$GIT_USER:$GIT_GROUP" "$REPO_DIR"
 # Ensure docker is running and create image '$DOCKER_TAG'
 echo "Ensure that docker is running and create image '$DOCKER_TAG'"
 service docker start
-docker build -t "$DOCKER_TAG" "./config/"
+docker build -t "$DOCKER_TAG" "./docker/base/"
 
 # Write config
 echo "export REPO_DIR=$REPO_DIR" > "$CONFIG_FILE"
