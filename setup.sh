@@ -124,7 +124,7 @@ chown -R "$GIT_USER:$GIT_GROUP" "$GIT_HOME/go"
 
 # Set GOPATH and build testrun
 echo "Build testrun command"
-echo "export GOPATH=$GIT_HOME'/go'" > "$GIT_HOME/.profile"
+echo "export GOPATH=$GIT_HOME/go" > "$GIT_HOME/.bashrc"
 chown "$GIT_USER:$GIT_GROUP" "$GIT_HOME/.profile"
 su -s "/bin/bash" - git -c "go get testrun && go build testrun"
 
