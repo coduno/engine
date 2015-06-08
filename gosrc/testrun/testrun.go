@@ -2,10 +2,12 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"io"
 	"log"
 	"os"
 	"os/exec"
+	"syscall"
 	"time"
 
 	"golang.org/x/net/context"
@@ -32,9 +34,11 @@ type BuildData struct {
 // LogData is used to represent accumulated log data of a single invokation of
 // a coduno build
 type LogData struct {
-	InLog    string
-	OutLog   string
-	ExtraLog string
+	InLog      string `datastore:",noindex"`
+	OutLog     string `datastore:",noindex"`
+	ExtraLog   string `datastore:",noindex"`
+	PrepareLog string `datastore:",noindex"`
+	SysUsage   syscall.Rusage
 }
 
 var signal = make(chan int)
@@ -78,7 +82,7 @@ func LogBuildStart(repo string, commit string, user string) (*datastore.Key,
 // LogRunComplete logs the end of a completed (failed of finished) run of
 // a coduno testrun
 func LogRunComplete(pKey *datastore.Key, build *BuildData, in string,
-	out string, extra string, exit error) {
+	out string, extra string, exit error, prepLog string, stats syscall.Rusage) {
 	tx, err := datastore.NewTransaction(ctx)
 	if err != nil {
 		log.Panic(err)
@@ -98,9 +102,11 @@ func LogRunComplete(pKey *datastore.Key, build *BuildData, in string,
 		}
 	}
 	data := &LogData{
-		InLog:    in,
-		OutLog:   out,
-		ExtraLog: extra,
+		InLog:      in,
+		OutLog:     out,
+		ExtraLog:   extra,
+		PrepareLog: prepLog,
+		SysUsage:   stats,
 	}
 	k := datastore.NewIncompleteKey(ctx, "testrun", pKey)
 	_, err = tx.Put(k, data)
@@ -183,6 +189,23 @@ func main() {
 
 	<-signal
 	<-signal
-	err = cmd.Wait()
-	LogRunComplete(key, build, "", b1.String(), b2.String(), err)
+	exitErr := cmd.Wait()
+
+	prepLog, err := ioutil.ReadFile(tmpdir + "/prepare.log")
+	if err != nil { // This file should always exist, so an error here should never happen
+		log.Fatal(err)
+	}
+
+	var stats syscall.Rusage
+	statsData, err := ioutil.ReadFile(tmpdir + "/stats.log")
+	if err != nil {
+		log.Print(err)
+	} else {
+		err = json.Unmarshal(statsData, &stats)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	LogRunComplete(key, build, "", b1.String(), b2.String(), exitErr, string(prepLog), stats)
 }
