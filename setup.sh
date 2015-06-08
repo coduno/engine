@@ -20,12 +20,10 @@
 #   |      \-testrun
 #   |         \-testrun.go
 #   |-hooks
-#   |   |-post-receive
-#   |   \-update
+#   |   \-post-receive
 #   |-git-shell-commands
 #   |   \-no-interactive-login
 #   |-config
-#   |   |-Dockerfile
 #   |   \-secret.json
 #   |-user
 #       |-<example user>
@@ -110,10 +108,10 @@ chmod a+x "$GIT_HOME/git-shell-commands/reroute-user"
 touch "$GIT_HOME/.hushlogin"
 chmod 0444 "$GIT_HOME/.hushlogin"
 
-# Copy hooks to git directory
-echo "Copy hooks to '$GIT_HOME'"
+# Copy hook to git directory
+echo "Copy hook to '$GIT_HOME'"
 mkdir -p "$GIT_HOME/hooks"
-cp "./hooks/post-receive" "./hooks/update" "$GIT_HOME/hooks"
+cp "./hooks/post-receive" "$GIT_HOME/hooks"
 chown -R "$GIT_USER:$GIT_GROUP" "$GIT_HOME/hooks"
 
 # Set up go path and copy testrun source into into
