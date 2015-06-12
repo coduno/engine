@@ -31,7 +31,7 @@
 #       \-<example user2>
 #
 
-PACKAGES="openssh-server git docker.io"
+PACKAGES="openssh-server git docker"
 GIT_USER="git"
 GIT_GROUP="git"
 GIT_SHELL="/usr/bin/git-shell"
@@ -66,8 +66,9 @@ fi
 
 # Install all required packages
 echo "Install required packages"
-apt-get -y install $PACKAGES > /dev/null 2>&1 || \
-yum -y install $PACKAGES > /dev/null 2>&1
+apt-get -y install $PACKAGES 2> /dev/null || \
+yum -y install $PACKAGES 2> /dev/null || \
+dnf -y install $PACKAGES
 
 
 # Add git user, if neccessary
