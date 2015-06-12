@@ -26,25 +26,28 @@ fi
 CHALLENGE_NAME="$1"
 
 # Check if challenge already exists
-cd "$REPO_DIR"
-if [ -d "$CHALLENGE_NAME.git" ]; then
+if [ -d "$REPO_DIR/$CHALLENGE_NAME" ]; then
 	echo "Challenge name already in use"
 	exit 1
 fi
 
 echo "Create directory for challenge '$CHALLENGE_NAME'"
-mkdir -p "$CHALLENGE_NAME.git"
-cd "$CHALLENGE_NAME.git"
+mkdir -p "$REPO_DIR/$CHALLENGE_NAME"
 
 # Init git repo without working directory
 echo "Let git init the repo"
-git --bare init
+git --bare init "$REPO_DIR/$CHALLENGE_NAME"
 
-rm -rf hooks
-ln -s "$GIT_HOME/hooks" "hooks"
-chmod a+x ./hooks/*
-chown -R "$GIT_USER:$GIT_GROUP" "$(pwd)"
+rm -rf "$REPO_DIR/$CHALLENGE_NAME/hooks"
+ln -s "$GIT_HOME/hooks" "$REPO_DIR/$CHALLENGE_NAME/hooks"
+chmod -R a+x "$REPO_DIR/$CHALLENGE_NAME/hooks/"
+chown -R "$GIT_USER:$GIT_GROUP" "$REPO_DIR/$CHALLENGE_NAME"
+
+# Init git repo for tests
+mkdir -p "$GIT_HOME/tests/$CHALLENGE_NAME"
+git --bare init "$GIT_HOME/tests/$CHALLENGE_NAME"
+chown -R "$GIT_USER:$GIT_GROUP" "$GIT_HOME/tests/$CHALLENGE_NAME"
 
 # Link directory for convinient access
 echo "Setting link"
-ln -s "$(pwd)" "$GIT_HOME/$CHALLENGE_NAME"
+ln -s "$REPO_DIR/$CHALLENGE_NAME" "$GIT_HOME/$CHALLENGE_NAME"

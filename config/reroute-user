@@ -14,6 +14,12 @@ fi
 REPO="${REPO%\'}"
 REPO="${REPO#\'}"
 
+if [ "$(dirname $REPO)" == "tests" ]; then
+   # TODO: Special case for pushing to test-repo, handle access rights and more
+   /bin/git-shell -c "$SSH_ORIGINAL_COMMAND"
+   exit "$?"
+fi
+
 if [ "$CMD" = "git-receive-pack" ]; then
    if [ ! -d "$HOME/user/$GITHUB_USERNAME/$REPO" ]; then
       mkdir -p "$HOME/user/$GITHUB_USERNAME"

@@ -9,10 +9,11 @@ set -e
 unset GIT_DIR
 
 CLONE=$(mktemp -p /tmp -d coduno.XXX)
+TESTCLONE=$(mktemp -p /tmp -d coduno-test.XXX)
 
 # As users are only allowed to push to their named branch
 # there can only be one line of input, so we can safely
-# omit a loop here.
+# omit a loop here. TODO: This constraint is no longer valid
 read OLD NEW REF
 
 # Now clone the repository to out temporary directory.
@@ -27,6 +28,10 @@ git -C "$CLONE" checkout --quiet "$NEW"
 # Remove git information, we dont need it anymore
 rm -rf "$CLONE/.git"
 
+# Fetch the test program for the current challenge
+CHALLENGE="$(basename $PWD)"
+git clone --quiet "$HOME/tests/$CHALLENGE" "$TESTCLONE"
+
 # Invoke a testrun of the current commit
 REPO="$(basename $(pwd))"
-~/go/bin/testrun "$GITHUB_USERNAME" "$REPO" "$NEW" "$CLONE"
+~/go/bin/testrun "$GITHUB_USERNAME" "$REPO" "$NEW" "$CLONE" "$TESTCLONE"

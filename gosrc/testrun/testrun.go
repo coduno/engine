@@ -127,20 +127,22 @@ func sendSig() {
 	signal <- 1
 }
 
-func pipeOutput(out io.ReadCloser, dest io.WriteCloser, logBuf *bytes.Buffer) {
+func pipeOutput(out io.ReadCloser, dest io.Writer, logBuf *bytes.Buffer) {
 	tempBuf := make([]byte, 1024)
 	writeErr := error(nil)
 	r, readErr := int(0), error(nil)
 
 	defer out.Close()
-	defer dest.Close()
 	defer sendSig()
 
 	for readErr == nil {
 		r, readErr = out.Read(tempBuf)
-		logBuf.Write(tempBuf[0:r])
 
-		if r != 0 && writeErr == nil {
+		if logBuf != nil {
+			logBuf.Write(tempBuf[0:r])
+		}
+
+		if dest != nil && r != 0 && writeErr == nil {
 			_, writeErr := dest.Write(tempBuf[0:r])
 			if writeErr != nil {
 				log.Print(writeErr)
@@ -150,7 +152,7 @@ func pipeOutput(out io.ReadCloser, dest io.WriteCloser, logBuf *bytes.Buffer) {
 }
 
 func main() {
-	if len(os.Args) != 5 {
+	if len(os.Args) != 6 {
 		log.Fatal(os.Args)
 	}
 
@@ -158,9 +160,10 @@ func main() {
 	repo := os.Args[2]
 	commit := os.Args[3]
 	tmpdir := os.Args[4]
+	testdir := os.Args[5]
 
 	key, build := LogBuildStart(repo, commit, username)
-	cmd := exec.Command(
+	cmdUser := exec.Command(
 		"sudo",
 		"docker",
 		"run",
@@ -168,28 +171,54 @@ func main() {
 		"-v",
 		tmpdir+":/run",
 		"coduno/base")
-	stdout, err := cmd.StdoutPipe()
+	cmdTest := exec.Command(
+		"sudo",
+		"docker",
+		"run",
+		"--rm",
+		"-v",
+		testdir+":/run",
+		"coduno/base")
+	outUser, err := cmdUser.StdoutPipe()
 	if err != nil {
 		log.Fatal(err)
 	}
-	stderr, err := cmd.StderrPipe()
+	errUser, err := cmdUser.StderrPipe()
 	if err != nil {
 		log.Fatal(err)
 	}
-	stdin, err := cmd.StdinPipe()
+	inUser, err := cmdUser.StdinPipe()
+	if err != nil {
+		log.Fatal(err)
+	}
+	outTest, err := cmdTest.StdoutPipe()
+	if err != nil {
+		log.Fatal(err)
+	}
+	errTest, err := cmdTest.StderrPipe()
+	if err != nil {
+		log.Fatal(err)
+	}
+	inTest, err := cmdTest.StdinPipe()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	var b1 bytes.Buffer
-	var b2 bytes.Buffer
-	cmd.Start()
-	go pipeOutput(stdout, stdin, &b1)
-	go pipeOutput(stderr, stdin, &b2)
+	var userToTest bytes.Buffer
+	var testToUser bytes.Buffer
+	var extraBuf bytes.Buffer
+	cmdUser.Start()
+	cmdTest.Start()
+	go pipeOutput(outUser, inTest, &userToTest)
+	go pipeOutput(outTest, inUser, &testToUser)
+	go pipeOutput(errUser, os.Stderr, nil)
+	go pipeOutput(errTest, ioutil.Discard, &extraBuf)
 
 	<-signal
 	<-signal
-	exitErr := cmd.Wait()
+	<-signal
+	<-signal
+	exitErr := cmdUser.Wait()
 
 	prepLog, err := ioutil.ReadFile(tmpdir + "/prepare.log")
 	if err != nil { // This file should always exist, so an error here should never happen
@@ -207,5 +236,5 @@ func main() {
 		}
 	}
 
-	LogRunComplete(key, build, "", b1.String(), b2.String(), exitErr, string(prepLog), stats)
+	LogRunComplete(key, build, testToUser.String(), userToTest.String(), extraBuf.String(), exitErr, string(prepLog), stats)
 }

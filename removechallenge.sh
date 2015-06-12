@@ -25,7 +25,8 @@ fi
 CHALLENGE_NAME="$1"
 
 echo "Remove git repo"
-rm -rf "$REPO_DIR/$CHALLENGE_NAME.git" > /dev/null 2>&1
+rm -rf "$REPO_DIR/$CHALLENGE_NAME" > /dev/null 2>&1
 rm "$GIT_HOME/$CHALLENGE_NAME"
+rm -rf "$GIT_HOME/tests/$CHALLENGE_NAME"
 USERREPO="$GIT_HOME/user/*/$CHALLENGE_NAME"
 rm -rf "$USERREPO"
