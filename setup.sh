@@ -65,84 +65,68 @@ if [[ "$EUID" -ne 0 ]]; then
 fi
 
 # Install all required packages
-echo "Install required packages"
 apt-get -y install $PACKAGES 2> /dev/null || \
 yum -y install $PACKAGES 2> /dev/null || \
 dnf -y install $PACKAGES
 
 # Add git user, if neccessary
-echo "Setting up user '$GIT_USER'"
-if id -u "$GIT_USER" > /dev/null 2>&1 ; then
-	# User exists, point $GIT_HOME to right directory
-	GIT_HOME="$(eval echo ~$GIT_USER)"
-	GIT_GROUP="$(id -g -n $GIT_USER)"
-	echo "User '$GIT_USER' already exists, setting \$GIT_HOME to $GIT_HOME"
+if id -u "$GIT_USER"
+then
+	# user exists, so just repoint $GIT_HOME
+	GIT_HOME="$(echo ~$GIT_USER)"
+	echo "\$GIT_HOME -> $GIT_HOME"
 else
-	echo "Adding new user '$GIT_USER'"
-	useradd -d "$GIT_HOME" -s "$GIT_SHELL" "$GIT_USER"
-	GIT_GROUP="$(id -g -n $GIT_USER)"
-	echo "Create home directory '$GIT_HOME'"
-	mkdir -p "$GIT_HOME"
-	chown "$GIT_USER:$GIT_GROUP" "$GIT_HOME"
+	useradd --home "$GIT_HOME" --create-home --shell "$GIT_SHELL" "$GIT_USER"
 fi
+GIT_GROUP="$(id -g -n $GIT_USER)"
 
-# Add .ssh/authorized_keys file to $GIT_USER
-echo "Ensure there is an authorized_keys file for user '$GIT_USER' at '$GIT_HOME'"
-mkdir -p "$GIT_HOME/.ssh"
+# .ssh/authorized_keys
+mkdir -vp "$GIT_HOME/.ssh"
 touch "$GIT_HOME/.ssh/authorized_keys"
-chown -R "$GIT_USER:$GIT_GROUP" "$GIT_HOME/.ssh"
+chown -vR "$GIT_USER:$GIT_GROUP" "$GIT_HOME/.ssh"
 
-# Set greeting for the interactive shell
-echo "Set greeting message for user git"
-mkdir -p "$GIT_HOME/git-shell-commands"
+# greeting
+mkdir -vp "$GIT_HOME/git-shell-commands"
 cp -vf "./config/greeting" "$GIT_HOME/git-shell-commands/no-interactive-login"
-chmod a+x "$GIT_HOME/git-shell-commands/no-interactive-login"
+chmod -v a+x "$GIT_HOME/git-shell-commands/no-interactive-login"
 
-# Copy reroute-user script for access-control to allowed commands
-echo "Copy reroute-user to allowed commands"
+# reroute-user
 cp -vf "./config/reroute-user" "$GIT_HOME/git-shell-commands/reroute-user"
-chown -R "$GIT_USER:$GIT_GROUP" "$GIT_HOME/git-shell-commands"
-chmod a+x "$GIT_HOME/git-shell-commands/reroute-user"
+chown -vR "$GIT_USER:$GIT_GROUP" "$GIT_HOME/git-shell-commands"
+chmod -v a+x "$GIT_HOME/git-shell-commands/reroute-user"
 
 # Prevent SSHd from printing MOTD and Last Login
 touch "$GIT_HOME/.hushlogin"
-chmod 0444 "$GIT_HOME/.hushlogin"
+chmod -v 0444 "$GIT_HOME/.hushlogin"
 
 # Copy hook to git directory
-echo "Copy hook to '$GIT_HOME'"
-mkdir -p "$GIT_HOME/hooks"
+mkdir -vp "$GIT_HOME/hooks"
 cp -vf "./hooks/post-receive" "$GIT_HOME/hooks"
-chown -R "$GIT_USER:$GIT_GROUP" "$GIT_HOME/hooks"
+chown -vR "$GIT_USER:$GIT_GROUP" "$GIT_HOME/hooks"
 
 # Set up go path and copy testrun source into into
-echo "Copy go source files"
-mkdir -p "$GIT_HOME/go/src"
+mkdir -vp "$GIT_HOME/go/src"
 cp -vfr gosrc/* "$GIT_HOME/go/src"
-chown -R "$GIT_USER:$GIT_GROUP" "$GIT_HOME/go"
+chown -vR "$GIT_USER:$GIT_GROUP" "$GIT_HOME/go"
 
 # Set GOPATH and build testrun
-echo "Build testrun command"
 echo "export GOPATH=$GIT_HOME/go" > "$GIT_HOME/.bashrc"
 chown "$GIT_USER:$GIT_GROUP" "$GIT_HOME/.profile"
 su -s "/bin/bash" - git -c "go get testrun && go build testrun"
 
 # Copy config files
-echo "Copy config files"
-mkdir -p "$GIT_HOME/config"
+mkdir -vp "$GIT_HOME/config"
 cp -vf ./config/* "$GIT_HOME/config"
-chown -R "$GIT_USER:$GIT_GROUP" "$GIT_HOME/config"
-chmod -R 555 "$GIT_HOME/config"
+chown -vR "$GIT_USER:$GIT_GROUP" "$GIT_HOME/config"
+chmod -vR 555 "$GIT_HOME/config"
 
 # Ensure $REPO_DIR exists
-echo "Ensure that the repo directory exists at '$REPO_DIR'"
-mkdir -p "$REPO_DIR"
+mkdir -vp "$REPO_DIR"
 
 # Ensure git has write access to $REPO_DIR
-echo "Change owner of '$REPO_DIR' to '$GIT_USER'"
-chown -R "$GIT_USER:$GIT_GROUP" "$REPO_DIR"
+chown -vR "$GIT_USER:$GIT_GROUP" "$REPO_DIR"
 
 # Ensure docker is running and create image '$DOCKER_TAG'
-echo "Ensure that docker is running and create image '$DOCKER_TAG'"
 service docker start
 docker build -t "$DOCKER_TAG" "./docker/base/"
 
