@@ -70,7 +70,6 @@ apt-get -y install $PACKAGES 2> /dev/null || \
 yum -y install $PACKAGES 2> /dev/null || \
 dnf -y install $PACKAGES
 
-
 # Add git user, if neccessary
 echo "Setting up user '$GIT_USER'"
 if id -u "$GIT_USER" > /dev/null 2>&1 ; then
@@ -96,12 +95,12 @@ chown -R "$GIT_USER:$GIT_GROUP" "$GIT_HOME/.ssh"
 # Set greeting for the interactive shell
 echo "Set greeting message for user git"
 mkdir -p "$GIT_HOME/git-shell-commands"
-cp "./config/greeting" "$GIT_HOME/git-shell-commands/no-interactive-login"
+cp -vf "./config/greeting" "$GIT_HOME/git-shell-commands/no-interactive-login"
 chmod a+x "$GIT_HOME/git-shell-commands/no-interactive-login"
 
 # Copy reroute-user script for access-control to allowed commands
 echo "Copy reroute-user to allowed commands"
-cp "./config/reroute-user" "$GIT_HOME/git-shell-commands/reroute-user"
+cp -vf "./config/reroute-user" "$GIT_HOME/git-shell-commands/reroute-user"
 chown -R "$GIT_USER:$GIT_GROUP" "$GIT_HOME/git-shell-commands"
 chmod a+x "$GIT_HOME/git-shell-commands/reroute-user"
 
@@ -112,13 +111,13 @@ chmod 0444 "$GIT_HOME/.hushlogin"
 # Copy hook to git directory
 echo "Copy hook to '$GIT_HOME'"
 mkdir -p "$GIT_HOME/hooks"
-cp "./hooks/post-receive" "$GIT_HOME/hooks"
+cp -vf "./hooks/post-receive" "$GIT_HOME/hooks"
 chown -R "$GIT_USER:$GIT_GROUP" "$GIT_HOME/hooks"
 
 # Set up go path and copy testrun source into into
 echo "Copy go source files"
 mkdir -p "$GIT_HOME/go/src"
-cp -r gosrc/* "$GIT_HOME/go/src"
+cp -vfr gosrc/* "$GIT_HOME/go/src"
 chown -R "$GIT_USER:$GIT_GROUP" "$GIT_HOME/go"
 
 # Set GOPATH and build testrun
@@ -130,7 +129,7 @@ su -s "/bin/bash" - git -c "go get testrun && go build testrun"
 # Copy config files
 echo "Copy config files"
 mkdir -p "$GIT_HOME/config"
-cp ./config/* "$GIT_HOME/config"
+cp -vf ./config/* "$GIT_HOME/config"
 chown -R "$GIT_USER:$GIT_GROUP" "$GIT_HOME/config"
 chmod -R 555 "$GIT_HOME/config"
 
