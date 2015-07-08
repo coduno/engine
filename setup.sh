@@ -1,6 +1,7 @@
 #!/bin/bash
 #
-# Author: Moritz Wanzenböck (moritz.wanzenboeck@gmail.com)
+# Authors: Moritz Wanzenböck <moritz.wanzenboeck@cod.uno>
+#          Lorenz Leutgeb <lorenz.leutgeb@cod.uno>
 #
 # Script to set up a debian/ubuntu server to be used as a docker engine
 #
@@ -15,10 +16,9 @@
 #   |   \-authorized_keys
 #   |-go
 #   |   |-bin
+#   |   |  \-piper
 #   |   |-pkg
 #   |   \-src
-#   |      \-testrun
-#   |         \-testrun.go
 #   |-hooks
 #   |   \-post-receive
 #   |-git-shell-commands
@@ -73,7 +73,7 @@ dnf -y install $PACKAGES
 if id -u "$GIT_USER"
 then
 	# user exists, so just repoint $GIT_HOME
-	GIT_HOME="$(echo ~$GIT_USER)"
+	GIT_HOME="$(eval echo ~$GIT_USER)"
 	echo "\$GIT_HOME -> $GIT_HOME"
 else
 	useradd --home "$GIT_HOME" --create-home --shell "$GIT_SHELL" "$GIT_USER"
@@ -104,15 +104,11 @@ mkdir -vp "$GIT_HOME/hooks"
 cp -vf "./hooks/post-receive" "$GIT_HOME/hooks"
 chown -vR "$GIT_USER:$GIT_GROUP" "$GIT_HOME/hooks"
 
-# Set up go path and copy testrun source into into
-mkdir -vp "$GIT_HOME/go/src"
-cp -vfr gosrc/* "$GIT_HOME/go/src"
-chown -vR "$GIT_USER:$GIT_GROUP" "$GIT_HOME/go"
-
-# Set GOPATH and build testrun
+# Set GOPATH and install piper
 echo "export GOPATH=$GIT_HOME/go" > "$GIT_HOME/.bashrc"
-chown "$GIT_USER:$GIT_GROUP" "$GIT_HOME/.profile"
-su -s "/bin/bash" - git -c "go get testrun && go build testrun"
+echo "export PATH=\$PATH:\$GOPATH/bin" >> "$GIT_HOME/.bashrc"
+chown "$GIT_USER:$GIT_GROUP" "$GIT_HOME/.bashrc"
+su -s "$SHELL" - git -c "go get github.com/coduno/piper"
 
 # Copy config files
 mkdir -vp "$GIT_HOME/config"

@@ -33,6 +33,6 @@ rm -rf "$CLONE/.git"
 CHALLENGE="$(basename $PWD)"
 git clone --quiet "$HOME/tests/$CHALLENGE" "$TESTCLONE"
 
-# Invoke a testrun of the current commit
+# Let piper do the magic and execute the code
 REPO="$(basename $(pwd))"
-~/go/bin/testrun "$GITHUB_USERNAME" "$REPO" "$NEW" "$CLONE" "$TESTCLONE"
+piper "$GITHUB_USERNAME" "$REPO" "$NEW" "$CLONE" "$TESTCLONE"
