@@ -36,8 +36,8 @@ GIT_USER="git"
 GIT_GROUP="git"
 GIT_SHELL="/usr/bin/git-shell"
 DOCKER_TAG="coduno/base"
-DEFAULT_REPO_DIR="/opt/coduno/engine/repo/"
-DEFAULT_GIT_HOME="/opt/coduno/engine/git/"
+DEFAULT_REPO_DIR="/opt/coduno/engine/repo"
+DEFAULT_GIT_HOME="/opt/coduno/engine/git"
 DEFAULT_CONFIG_FILE="config.rc"
 
 # Exit on error
