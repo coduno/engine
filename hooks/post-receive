@@ -8,6 +8,7 @@ set -e
 # Leaving this set will hurt your brains, trust me.
 unset GIT_DIR
 
+# Temporary clone target
 CLONE=$(mktemp -p /tmp -d coduno.XXX)
 TESTCLONE=$(mktemp -p /tmp -d coduno-test.XXX)
 
@@ -16,7 +17,7 @@ TESTCLONE=$(mktemp -p /tmp -d coduno-test.XXX)
 # omit a loop here. TODO: This constraint is no longer valid
 read OLD NEW REF
 
-# Now clone the repository to out temporary directory.
+# Now clone the repository to our temporary directory.
 # Keep in mind that $PWD still points to the reposotiry
 # because we are inside a hook.
 git clone --no-checkout --quiet "$PWD" "$CLONE"
@@ -25,7 +26,7 @@ git clone --no-checkout --quiet "$PWD" "$CLONE"
 # quietly as we do not really care about detaching HEAD
 git -C "$CLONE" checkout --quiet "$NEW"
 
-# Remove git information, we dont need it anymore
+# Remove Git metadata, we don't need it anymore
 rm -rf "$CLONE/.git"
 
 # Fetch the test program for the current challenge
