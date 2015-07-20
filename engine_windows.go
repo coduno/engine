@@ -1,16 +1,15 @@
-// +build windows
-
 package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/user"
 	"path"
 	"strings"
 )
 
-var currentUser os.User
+var currentUser *user.User
 
 // dockerize takes a Windows path (with volume and
 // backslashes) and translates it into a Unix-like
@@ -30,19 +29,20 @@ func dockerize(path string) (result string, err error) {
 		return
 	}
 
-	return "/" + path[:1] + "/" + strings.Replace(path[2:], `\`, `/`, -1), nil
+	return "/" + strings.ToLower(path[:1]) + "/" + strings.Replace(path[3:], `\`, `/`, -1), nil
 }
 
-func volumeDir() (string, err error) {
-	dir, err := ioutil.CreateTempDir(path.Join(currentUser.HomeDir, "tmp"), "coduno-volume")
+func volumeDir() (dir string, err error) {
+	dir, err = ioutil.TempDir(path.Join(currentUser.HomeDir, "tmp"), "coduno-volume")
 	if err != nil {
 		return
 	}
-	return dir
+	return
 }
 
 func init() {
-	currentUser, err := user.Current()
+	var err error
+	currentUser, err = user.Current()
 	if err != nil {
 		panic(err)
 	}
