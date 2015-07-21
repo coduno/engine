@@ -15,7 +15,6 @@ import (
 
 	"github.com/coduno/app/models"
 	"github.com/coduno/app/util"
-	"github.com/coduno/piper"
 )
 
 var (
@@ -28,6 +27,7 @@ var (
 )
 
 const configFileName string = "coduno.yaml"
+const volumePattern string = "coduno-volume"
 
 func startSimpleRun(w http.ResponseWriter, r *http.Request) {
 	if !util.CheckMethod(w, r, "POST") {

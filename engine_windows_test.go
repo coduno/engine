@@ -4,9 +4,15 @@ import "testing"
 
 func TestDockerize(*testing.T) {
 	const expected = "/c/users/Foo"
+
 	var dockerized string
-	dockerized = dockerize(`C:\users\Foo`)
+	dockerized, err := dockerize(`C:\users\Foo`)
+
+	if err != nil {
+		t.Error("Unexpected error: ", err)
+	}
+
 	if dockerized != expected {
-		t.Errorf("Expected '%s', got '%s'", expected, dockerized)
+		t.Error("Expected '", expected, "', got '", dockerized, "'")
 	}
 }

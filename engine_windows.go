@@ -29,15 +29,11 @@ func dockerize(path string) (result string, err error) {
 		return
 	}
 
-	return "/" + strings.ToLower(path[:1]) + "/" + strings.Replace(path[3:], `\`, `/`, -1), nil
+	return "/" + string(path[0]|32) + "/" + strings.Replace(path[3:], `\`, `/`, -1), nil
 }
 
-func volumeDir() (dir string, err error) {
-	dir, err = ioutil.TempDir(path.Join(currentUser.HomeDir, "tmp"), "coduno-volume")
-	if err != nil {
-		return
-	}
-	return
+func volumeDir() (string, error) {
+	return ioutil.TempDir(path.Join(currentUser.HomeDir, "tmp"), volumePattern)
 }
 
 func init() {
