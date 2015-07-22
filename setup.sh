@@ -113,10 +113,10 @@ cp -vf "./hooks/post-receive" "$GIT_HOME/hooks"
 chown -vR "$GIT_USER:$GIT_GROUP" "$GIT_HOME/hooks"
 
 # Set GOPATH and install piper
-echo "export GOPATH=$GIT_HOME/go" > "$GIT_HOME/.bashrc"
-echo "export PATH=\$PATH:/usr/local/go/bin:\$GOPATH/bin" >> "$GIT_HOME/.bashrc"
-chown "$GIT_USER:$GIT_GROUP" "$GIT_HOME/.bashrc"
-su -s "$SHELL" - git -c "go get github.com/coduno/piper"
+echo "export GOPATH=$GIT_HOME/go" > "$GIT_HOME/.profile"
+echo "export PATH=\$PATH:/usr/local/go/bin:\$GOPATH/bin" >> "$GIT_HOME/.profile"
+chown "$GIT_USER:$GIT_GROUP" "$GIT_HOME/.profile"
+su --shell "$SHELL" --login --command "go get github.com/coduno/piper" git
 
 # Copy config files
 mkdir -vp "$GIT_HOME/config"
