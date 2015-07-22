@@ -83,9 +83,8 @@ then
 	GIT_HOME="$(eval echo ~$GIT_USER)"
 	echo "\$GIT_HOME -> $GIT_HOME"
 else
-	mkdir -vp "$GIT_HOME"
+	useradd --home "$GIT_HOME" --create-home --shell "$GIT_SHELL" "$GIT_USER"
 	chown -vR "$GIT_USER:$GIT_GROUP" "$GIT_HOME"
-	useradd --home "$GIT_HOME" --shell "$GIT_SHELL" "$GIT_USER"
 fi
 GIT_GROUP="$(id -g -n $GIT_USER)"
 
