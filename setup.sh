@@ -70,6 +70,7 @@ yum -y install $PACKAGES 2> /dev/null || \
 dnf -y install $PACKAGES
 
 if ! which go
+then
 	curl https://storage.googleapis.com/golang/go1.4.2.linux-amd64.tar.gz | tar -C /usr/local -xzv
 fi
 go version
