@@ -114,7 +114,7 @@ chown -vR "$GIT_USER:$GIT_GROUP" "$GIT_HOME/hooks"
 
 # Set GOPATH and install piper
 echo "export GOPATH=$GIT_HOME/go" > "$GIT_HOME/.bashrc"
-echo "export PATH=\$PATH:\$PATH:/usr/local/go/bin:\$GOPATH/bin" >> "$GIT_HOME/.bashrc"
+echo "export PATH=\$PATH:/usr/local/go/bin:\$GOPATH/bin" >> "$GIT_HOME/.bashrc"
 chown "$GIT_USER:$GIT_GROUP" "$GIT_HOME/.bashrc"
 su -s "$SHELL" - git -c "go get github.com/coduno/piper"
 
