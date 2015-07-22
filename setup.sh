@@ -72,6 +72,7 @@ dnf -y install $PACKAGES
 if ! which go
 then
 	curl https://storage.googleapis.com/golang/go1.4.2.linux-amd64.tar.gz | tar -C /usr/local -xzv
+	export PATH=$PATH:/usr/local/go/bin
 fi
 go version
 
